@@ -7,15 +7,18 @@
 
 import Foundation
 
-guard CommandLine.arguments.count == 2 else {
-    print("usage: lc [absolute path of a file]")
-    exit(1)
+do {
+    let (rootPath, ext) = try resolveArgs()
+    let fileURLs = enumerateFileURLs(fileURL: URL(fileURLWithPath: rootPath))
+    output(fileURLs: fileURLs, ext: ext)
+} catch {
+    switch error {
+    case LCError.help:
+        exitWithManual(0)
+    case LCError.invalidOptions:
+        exitWithManual(1)
+    default:
+        break
+    }
 }
 
-let fileUrl = URL(fileURLWithPath: CommandLine.arguments[1])
-guard let file = try? String(contentsOf: fileUrl, encoding: .utf8) else {
-    print("Error: could not read \(fileUrl.absoluteString)")
-    exit(2)
-}
-
-print(file.components(separatedBy: CharacterSet.newlines).count)
