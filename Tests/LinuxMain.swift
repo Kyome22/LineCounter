@@ -1,5 +1,4 @@
 import XCTest
-
 import LineCounterTests
 
 var tests = [XCTestCaseEntry]()

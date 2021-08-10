@@ -9,14 +9,27 @@ let package = Package(
         .macOS(.v10_15)
     ],
     products: [
-        .executable(name: "lc", targets: ["LineCounter"])
+        .library(
+            name: "LineCounterLibrary",
+            targets: ["LineCounterLibrary"]
+        ),
+        .executable(
+            name: "lc",
+            targets: ["LineCounter"]
+        )
     ],
     targets: [
         .target(
+            name: "LineCounterLibrary",
+            dependencies: []
+        ),
+        .target(
             name: "LineCounter",
-            dependencies: []),
+            dependencies: ["LineCounterLibrary"]
+        ),
         .testTarget(
-            name: "LineCounterTests",
-            dependencies: ["LineCounter"]),
+            name: "LineCounterLibraryTests",
+            dependencies: ["LineCounterLibrary"]
+        )
     ]
 )

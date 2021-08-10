@@ -6,19 +6,6 @@
 //
 
 import Foundation
+import LineCounterLibrary
 
-do {
-    let (rootPath, ext) = try resolveArgs()
-    let fileURLs = enumerateFileURLs(fileURL: URL(fileURLWithPath: rootPath))
-    output(fileURLs: fileURLs, ext: ext)
-} catch {
-    switch error {
-    case LCError.help:
-        exitWithManual(0)
-    case LCError.invalidOptions:
-        exitWithManual(1)
-    default:
-        break
-    }
-}
-
+run(arguments: Array(CommandLine.arguments.dropFirst()))

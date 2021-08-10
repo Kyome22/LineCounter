@@ -24,19 +24,17 @@ func exitWithManual(_ num: Int32) -> Never {
     exit(num)
 }
 
-func resolveArgs() throws -> (rootPath: String, ext: String?) {
-    var args = CommandLine.arguments
-    args.removeFirst()
+func resolveArgs(args: [String]) throws -> (paths: [String], ext: String?) {
     if args.contains(where: { $0 == "-h" || $0 == "--help" }) {
         throw LCError.help
     }
-    var path: String?
+    var paths = [String]()
     var ext: String?
     for i in stride(from: 0, to: args.count, by: 2) {
         switch args[i] {
         case "-p", "--path":
             if i + 1 < args.count {
-                path = args[i + 1]
+                paths.append(args[i + 1])
             }
         case "-e", "--extension":
             if i + 1 < args.count {
@@ -48,8 +46,8 @@ func resolveArgs() throws -> (rootPath: String, ext: String?) {
             throw LCError.invalidOptions
         }
     }
-    if let rootPath = path {
-        return (rootPath, ext)
+    if !paths.isEmpty {
+        return (paths, ext)
     }
     throw LCError.invalidOptions
 }
@@ -81,18 +79,41 @@ func countLine(with fileURL: URL, ext: String?) throws -> Int {
     return file.components(separatedBy: CharacterSet.newlines).count
 }
 
-func output(fileURLs: [URL], ext: String?) {
+func output(fileURLs: [URL], ext: String?) -> String {
+    var result: String = ""
     var total: Int = 0
     fileURLs.forEach { (fileURL) in
         do {
             let cnt: Int = try countLine(with: fileURL, ext: ext)
-            print("\(fileURL.path): \(cnt)")
+            result += "\t\(cnt)\t\(fileURL.path)\n"
             total += cnt
         } catch LCError.couldNotRead {
-            print("\(fileURL.path): could not read")
+            result += "\tCould not read\t\(fileURL.path)\n"
         } catch {
             // skip
         }
     }
-    print("\nTotal: \(total)")
+    result += "Total: \(total)"
+    return result
+}
+
+public func run(arguments: [String]) {
+    do {
+        let (paths, ext) = try resolveArgs(args: arguments)
+        let fileURLs = paths.flatMap { path -> [URL] in
+            let url = URL(fileURLWithPath: path)
+            return enumerateFileURLs(fileURL: url)
+        }
+        let result = output(fileURLs: fileURLs, ext: ext)
+        print(result)
+    } catch {
+        switch error {
+        case LCError.help:
+            exitWithManual(0)
+        case LCError.invalidOptions:
+            exitWithManual(1)
+        default:
+            break
+        }
+    }
 }
