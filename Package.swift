@@ -1,6 +1,4 @@
-// swift-tools-version:5.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
-
+// swift-tools-version:5.5
 import PackageDescription
 
 let package = Package(
@@ -9,27 +7,36 @@ let package = Package(
         .macOS(.v10_15)
     ],
     products: [
-        .library(
-            name: "LineCounterLibrary",
-            targets: ["LineCounterLibrary"]
-        ),
         .executable(
             name: "lc",
-            targets: ["LineCounter"]
+            targets: ["lc"]
+        ),
+        .library(
+            name: "LineCounterFramework",
+            targets: ["LineCounterFramework"]
+        )
+    ],
+    dependencies: [
+        .package(
+            name: "swift-argument-parser",
+            url: "https://github.com/apple/swift-argument-parser.git",
+            from: "1.0.3"
         )
     ],
     targets: [
-        .target(
-            name: "LineCounterLibrary",
-            dependencies: []
+        .executableTarget(
+            name: "lc",
+            dependencies: [
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                "LineCounterFramework"
+            ]
         ),
         .target(
-            name: "LineCounter",
-            dependencies: ["LineCounterLibrary"]
+            name: "LineCounterFramework"
         ),
         .testTarget(
-            name: "LineCounterLibraryTests",
-            dependencies: ["LineCounterLibrary"]
+            name: "LineCounterFrameworkTests",
+            dependencies: ["LineCounterFramework"]
         )
     ]
 )
