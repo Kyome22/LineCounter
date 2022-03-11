@@ -21,16 +21,18 @@ struct LC: ParsableCommand {
             help: "The path to the file or directory to count lines.")
     var paths: [String]
     
-    @Option(name: .shortAndLong,
+    @Option(wrappedValue: [],
+            name: [.customShort("e"), .customLong("extension")],
+            parsing: ArrayParsingStrategy.singleValue,
             help: "The extension of the file you want to count lines.")
-    var `extension`: String?
+    var extensions: [String]
     
     @Flag(help: "Do not output warnings.")
     var noWarnings: Bool = false
     
     mutating func run() throws {
         LineCounter.run(paths: self.paths,
-                        ext: self.extension,
+                        extentions: self.extensions,
                         noWarnings: self.noWarnings)
     }
 }

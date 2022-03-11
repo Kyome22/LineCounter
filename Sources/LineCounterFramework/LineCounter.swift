@@ -8,41 +8,39 @@
 import Foundation
 
 public struct LineCounter {
-    public static func run(paths: [String], ext: String?, noWarnings: Bool) {
+    public static func run(paths: [String], extentions: [String], noWarnings: Bool) {
         let lc = LineCounter()
         let filePaths = paths.flatMap { path -> [URL] in
-            lc.enumerateFilePaths(filePath: URL(fileURLWithPath: path))
+            lc.enumerateFilePaths(url: URL(fileURLWithPath: path))
         }
         if filePaths.isEmpty {
             Swift.print("There was no file to read.")
         } else {
-            let output = lc.output(filePaths: filePaths,
-                                   ext: ext,
-                                   noWarnings: noWarnings)
+            let output = lc.output(filePaths, extentions, noWarnings)
             Swift.print(output)
         }
     }
     
-    func enumerateFilePaths(filePath: URL) -> [URL] {
+    func enumerateFilePaths(url: URL) -> [URL] {
         let fm = FileManager.default
         var isDirectory: ObjCBool = false
-        guard fm.fileExists(atPath: filePath.path, isDirectory: &isDirectory) else {
+        guard fm.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
             return []
         }
         if isDirectory.boolValue {
-            guard let contents = try? fm.contentsOfDirectory(atPath: filePath.path) else {
+            guard let contents = try? fm.contentsOfDirectory(atPath: url.path) else {
                 return []
             }
             return contents.flatMap { content in
-                enumerateFilePaths(filePath: filePath.appendingPathComponent(content))
+                enumerateFilePaths(url: url.appendingPathComponent(content))
             }
         } else {
-            return [filePath]
+            return [url]
         }
     }
     
-    func countLine(with filePath: URL, ext: String?) throws -> Int {
-        if let ext = ext, filePath.pathExtension != ext {
+    func countLine(_ filePath: URL, _ extensions: [String]) throws -> Int {
+        guard extensions.isEmpty || extensions.contains(filePath.pathExtension) else {
             throw LCError.skipped(file: filePath.relativePath)
         }
         guard let file = try? String(contentsOf: filePath, encoding: .utf8) else {
@@ -51,12 +49,12 @@ public struct LineCounter {
         return file.components(separatedBy: CharacterSet.newlines).count
     }
     
-    func output(filePaths: [URL], ext: String?, noWarnings: Bool) -> String {
+    func output(_ filePaths: [URL], _ extensions: [String], _ noWarnings: Bool) -> String {
         var result: String = ""
         var total: Int = 0
         filePaths.forEach { filePath in
             do {
-                let count: Int = try countLine(with: filePath, ext: ext)
+                let count: Int = try countLine(filePath, extensions)
                 result += "\t\(count)\t\(filePath.relativePath)\n"
                 total += count
             } catch let lcError as LCError {
