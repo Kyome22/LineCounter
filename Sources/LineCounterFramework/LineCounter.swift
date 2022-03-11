@@ -8,7 +8,7 @@
 import Foundation
 
 public struct LineCounter {
-    public static func run(paths: [String], ext: String?) {
+    public static func run(paths: [String], ext: String?, noWarnings: Bool) {
         let lc = LineCounter()
         let filePaths = paths.flatMap { path -> [URL] in
             lc.enumerateFilePaths(filePath: URL(fileURLWithPath: path))
@@ -16,7 +16,9 @@ public struct LineCounter {
         if filePaths.isEmpty {
             Swift.print("There was no file to read.")
         } else {
-            let output = lc.output(filePaths: filePaths, ext: ext)
+            let output = lc.output(filePaths: filePaths,
+                                   ext: ext,
+                                   noWarnings: noWarnings)
             Swift.print(output)
         }
     }
@@ -49,7 +51,7 @@ public struct LineCounter {
         return file.components(separatedBy: CharacterSet.newlines).count
     }
     
-    func output(filePaths: [URL], ext: String?) -> String {
+    func output(filePaths: [URL], ext: String?, noWarnings: Bool) -> String {
         var result: String = ""
         var total: Int = 0
         filePaths.forEach { filePath in
@@ -58,6 +60,9 @@ public struct LineCounter {
                 result += "\t\(count)\t\(filePath.relativePath)\n"
                 total += count
             } catch let lcError as LCError {
+                if noWarnings {
+                    return
+                }
                 switch lcError {
                 case let .couldNotRead(file):
                     result += "\tCouldn’t read\t\(file)\n"

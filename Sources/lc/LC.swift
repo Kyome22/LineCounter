@@ -25,7 +25,12 @@ struct LC: ParsableCommand {
             help: "The extension of the file you want to count lines.")
     var `extension`: String?
     
+    @Flag(help: "Do not output warnings.")
+    var noWarnings: Bool = false
+    
     mutating func run() throws {
-        LineCounter.run(paths: paths, ext: self.extension)
+        LineCounter.run(paths: self.paths,
+                        ext: self.extension,
+                        noWarnings: self.noWarnings)
     }
 }
