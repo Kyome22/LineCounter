@@ -1,6 +1,6 @@
 //
 //  LCError.swift
-//  
+//
 //
 //  Created by ky0me22 on 2022/03/11.
 //
@@ -13,7 +13,7 @@ enum LCError: Error {
 }
 
 extension LCError: Equatable {
-    static func ==(lhs: Self, rhs: Self) -> Bool {
+    static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.couldNotRead(_), .couldNotRead(_)):
             return true

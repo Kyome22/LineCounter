@@ -1,4 +1,5 @@
 import XCTest
+
 @testable import LineCounterFramework
 
 final class LineCounterFrameworkTests: XCTestCase {
@@ -20,7 +21,7 @@ final class LineCounterFrameworkTests: XCTestCase {
         let actual = sut.enumerateFilePaths(url: srcURL)
             .map { url -> String in
                 let components = url.pathComponents
-                return components[components.count - 2 ..< components.count]
+                return components[components.count - 2..<components.count]
                     .joined(separator: "/")
             }
             .sorted()
@@ -29,7 +30,7 @@ final class LineCounterFrameworkTests: XCTestCase {
             "LineCounterFramework/LCVersion.swift",
             "LineCounterFramework/LineCounter.swift",
             "lc/LC.swift",
-            "lc/main.swift"
+            "lc/main.swift",
         ]
         XCTAssertEqual(actual, expect)
     }
@@ -50,7 +51,7 @@ final class LineCounterFrameworkTests: XCTestCase {
             XCTAssertEqual(error as? LCError, LCError.skipped(file: ""))
         }
     }
-
+    
     func testCountLineThrowLCErrorCouldNotRead() {
         let sut = LineCounter()
         let dummyFileURL = srcURL.appendingPathComponent("lc/dummy.swift")
@@ -58,12 +59,12 @@ final class LineCounterFrameworkTests: XCTestCase {
             XCTAssertEqual(error as? LCError, LCError.couldNotRead(file: ""))
         }
     }
-
+    
     func testOutput() {
         let sut = LineCounter()
         let filePaths = [
             srcURL.appendingPathComponent("lc/LC.swift"),
-            srcURL.appendingPathComponent("lc/main.swift")
+            srcURL.appendingPathComponent("lc/main.swift"),
         ]
         let actual = sut.output(filePaths, ["swift"], true)
         let lines = actual.components(separatedBy: CharacterSet.newlines).count
