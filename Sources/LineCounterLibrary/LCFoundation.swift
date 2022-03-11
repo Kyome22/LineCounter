@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by ky0me22 on 2021/04/23.
 //
@@ -9,17 +9,17 @@ import Foundation
 
 func exitWithManual(_ num: Int32) -> Never {
     let manual = """
-    Usage:
-      lc [-p <path>] [-e <extension>]
-      lc [-h | --help]
+        Usage:
+          lc [-p <path>] [-e <extension>]
+          lc [-h | --help]
 
-    Options:
+        Options:
 
-      -p, --path PATH            Specify an absolute path for the file or directory
+          -p, --path PATH            Specify an absolute path for the file or directory
 
-      -e, --extension EXTENSION  Specify a file extension for which you want to
-                                 count the number of lines
-    """
+          -e, --extension EXTENSION  Specify a file extension for which you want to
+                                     count the number of lines
+        """
     print(manual)
     exit(num)
 }
@@ -56,7 +56,7 @@ func enumerateFileURLs(fileURL: URL) -> [URL] {
     let fileManager = FileManager.default
     var isDirectory: ObjCBool = false
     if fileManager.fileExists(atPath: fileURL.path, isDirectory: &isDirectory) {
-        if isDirectory.boolValue  {
+        if isDirectory.boolValue {
             if let contents = try? fileManager.contentsOfDirectory(atPath: fileURL.path) {
                 return contents.flatMap {
                     enumerateFileURLs(fileURL: fileURL.appendingPathComponent($0))
