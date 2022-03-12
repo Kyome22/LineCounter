@@ -14,10 +14,10 @@ public struct LineCounter {
             lc.enumerateFilePaths(url: URL(fileURLWithPath: path))
         }
         if filePaths.isEmpty {
-            Swift.print("There was no file to read.")
+            Swift.print("⚠️ There was no file to read.")
         } else {
             let output = lc.output(filePaths, extentions, noWarnings)
-            Swift.print(output)
+            Swift.print("🎯 Result of LineCounter\n\(output)")
         }
     }
     
