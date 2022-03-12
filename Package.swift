@@ -1,4 +1,4 @@
-// swift-tools-version:5.5
+// swift-tools-version:5.3
 import PackageDescription
 
 let package = Package(
@@ -24,7 +24,7 @@ let package = Package(
         )
     ],
     targets: [
-        .executableTarget(
+        .target(
             name: "lc",
             dependencies: [
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
