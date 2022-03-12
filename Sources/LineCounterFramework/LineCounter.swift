@@ -13,6 +13,8 @@ public struct LineCounter {
         let filePaths = paths.flatMap { path -> [URL] in
             lc.enumerateFilePaths(url: URL(fileURLWithPath: path))
         }
+        let currentDirectory = FileManager.default.currentDirectoryPath
+        Swift.print("🐤 \(currentDirectory)")
         if filePaths.isEmpty {
             Swift.print("⚠️ There was no file to read.")
         } else {
