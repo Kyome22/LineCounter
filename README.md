@@ -40,16 +40,18 @@ $ lc -p [対象のパス] -e [拡張子]
 
 とすれば、行数をカウントするファイルの種類を指定できます。
 
-`--no-warnings` フラグを付ければ、行数のカウントをスキップしたファイルや、読み込み不可なファイルのログを省略できます。
+`--no-warnings` フラグを付ければ、行数のカウントをスキップしたファイルや読み込み不可なファイルのログを省略できます。
 
 ## プロジェクトへの導入方法
 
 1. Swift Pacakge Manager で LineCounter を Add します。
 
    <img src="./Images/add_package.png" alt="Add Package" width="500px">
-2. Target内では使用しないため、Choose Package Products for LineCounter はチェックをつけずにスルーします。
+
+2. Target 内では使用しないため、Choose Package Products for LineCounter はチェックをつけずにスルーします。
 
    <img src="./Images/not_choose_package.png" alt="Not Choose Package" width="500px">
+
 3. Target の Build Phase に Run Script を追加します。
 
    <img src="./Images/add_run_script.png" alt="Add Run Script" width="600px">
