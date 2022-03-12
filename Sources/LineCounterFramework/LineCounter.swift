@@ -55,7 +55,7 @@ public struct LineCounter {
         filePaths.forEach { filePath in
             do {
                 let count: Int = try countLine(filePath, extensions)
-                result += "\t\(count)\t\(filePath.relativePath)\n\t\t\(filePath.baseURL?.path ?? "no baseURL")\n"
+                result += "\t\(count)\t\(filePath.relativePath)\n"
                 total += count
             } catch let lcError as LCError {
                 if noWarnings {
