@@ -16,8 +16,7 @@ public struct LineCounter {
         if filePaths.isEmpty {
             Swift.print("⚠️ There was no file to read.")
         } else {
-            let output = lc.output(filePaths, extentions, noWarnings)
-            Swift.print("🎯 Result of LineCounter\n\(output)")
+            Swift.print(lc.output(filePaths, extentions, noWarnings))
         }
     }
     
@@ -51,12 +50,14 @@ public struct LineCounter {
     
     func output(_ filePaths: [URL], _ extensions: [String], _ noWarnings: Bool) -> String {
         var result: String = ""
-        var total: Int = 0
+        var fileCount: Int = 0
+        var totalCount: Int = 0
         filePaths.forEach { filePath in
             do {
                 let count: Int = try countLine(filePath, extensions)
                 result += "\t\(count)\t\(filePath.relativePath)\n"
-                total += count
+                fileCount += 1
+                totalCount += count
             } catch let lcError as LCError {
                 if noWarnings {
                     return
@@ -71,7 +72,10 @@ public struct LineCounter {
                 fatalError("Oops, impossible error.")
             }
         }
-        result += "Total: \(total)"
+        result = result.trimmingCharacters(in: .newlines)
+        if 1 < fileCount {
+            result = "🎯 Result of LineCounter\n\(result)\nTotal: \(totalCount) (\(fileCount) files)"
+        }
         return result
     }
 }

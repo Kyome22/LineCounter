@@ -1,9 +1,7 @@
 import XCTest
-
 @testable import LineCounterFramework
 
 final class LineCounterFrameworkTests: XCTestCase {
-    
     var rootPath: String {
         return URL(fileURLWithPath: #file).path.components(separatedBy: "Tests/").first!
     }
@@ -60,15 +58,24 @@ final class LineCounterFrameworkTests: XCTestCase {
         }
     }
     
-    func testOutput() {
+    func testOutputSinglePath() {
+        let sut = LineCounter()
+        let filePaths = [srcURL.appendingPathComponent("lc/LC.swift")]
+        let actual = sut.output(filePaths, ["swift"], true)
+        Swift.print(actual)
+        let lines = actual.components(separatedBy: CharacterSet.newlines).count
+        XCTAssertEqual(lines, 1)
+    }
+
+    func testOutputMultiPaths() {
         let sut = LineCounter()
         let filePaths = [
             srcURL.appendingPathComponent("lc/LC.swift"),
             srcURL.appendingPathComponent("lc/main.swift"),
         ]
         let actual = sut.output(filePaths, ["swift"], true)
+        Swift.print(actual)
         let lines = actual.components(separatedBy: CharacterSet.newlines).count
-        XCTAssertEqual(lines, 3)
+        XCTAssertEqual(lines, 4)
     }
-    
 }
