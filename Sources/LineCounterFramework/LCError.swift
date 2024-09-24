@@ -16,11 +16,11 @@ extension LCError: Equatable {
     static func == (lhs: Self, rhs: Self) -> Bool {
         switch (lhs, rhs) {
         case (.couldNotRead(_), .couldNotRead(_)):
-            return true
+            true
         case (.skipped(_), .skipped(_)):
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

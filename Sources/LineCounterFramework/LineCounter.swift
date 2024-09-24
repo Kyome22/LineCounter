@@ -26,15 +26,14 @@ public struct LineCounter {
         guard fm.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
             return []
         }
-        if isDirectory.boolValue {
-            guard let contents = try? fm.contentsOfDirectory(atPath: url.path) else {
-                return []
-            }
-            return contents.flatMap { content in
-                enumerateFilePaths(url: url.appendingPathComponent(content))
-            }
-        } else {
+        guard isDirectory.boolValue else {
             return [url]
+        }
+        guard let contents = try? fm.contentsOfDirectory(atPath: url.path) else {
+            return []
+        }
+        return contents.flatMap { content in
+            enumerateFilePaths(url: url.appendingPathComponent(content))
         }
     }
     

@@ -5,9 +5,10 @@ LineCounter は指定したファイルまたはディレクトリ内のファ�
 ## インストール方法
 
 ```shell
-$ git clone git@github.com:Kyome22/LineCounter.git
+$ git clone https://github.com/Kyome22/LineCounter.git
+$ cd LineCounter
 $ swift build -c release
-$ cp .build/release/lc /usr/local/bin/lc
+$ sudo cp .build/release/lc /usr/local/bin/lc
 ```
 
 ## 使い方

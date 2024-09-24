@@ -3,11 +3,11 @@ import XCTest
 
 final class LineCounterFrameworkTests: XCTestCase {
     var rootPath: String {
-        return URL(fileURLWithPath: #file).path.components(separatedBy: "Tests/").first!
+        URL(fileURLWithPath: #file).path.components(separatedBy: "Tests/").first!
     }
     
     var srcURL: URL {
-        return URL(fileURLWithPath: "\(rootPath)Sources/")
+        URL(fileURLWithPath: "\(rootPath)Sources/")
     }
     
     func testRootPath() {
