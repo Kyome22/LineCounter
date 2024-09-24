@@ -7,5 +7,5 @@
 
 public struct LCVersion {
     public let value: String
-    public static let current = LCVersion(value: "1.0.0")
+    public static let current = LCVersion(value: "1.1.0")
 }
