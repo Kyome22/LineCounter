@@ -9,7 +9,7 @@ import ArgumentParser
 import LineCounterFramework
 
 struct LC: ParsableCommand {
-    static var configuration = CommandConfiguration(
+    static let configuration = CommandConfiguration(
         commandName: "lc",
         abstract: "A tool to count the number of lines in the specified file.",
         version: LCVersion.current.value
