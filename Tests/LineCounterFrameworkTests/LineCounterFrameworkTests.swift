@@ -1,27 +1,21 @@
-import XCTest
 @testable import LineCounterFramework
 
-final class LineCounterFrameworkTests: XCTestCase {
-    var rootPath: String {
-        URL(fileURLWithPath: #file).path.components(separatedBy: "Tests/").first!
+import Foundation
+import Testing
+
+struct LineCounterFrameworkTests {
+    private var sourcesURL: URL {
+        guard let url = Bundle.module.resourceURL?.appending(path: "Sources") else {
+            fatalError("Failed to get Sources directory url.")
+        }
+        return url
     }
-    
-    var srcURL: URL {
-        URL(fileURLWithPath: "\(rootPath)Sources/")
-    }
-    
-    func testRootPath() {
-        Swift.print("🎯", srcURL.path)
-    }
-    
-    func testEnumerateFilePaths() {
+
+    @Test
+    func enumerate_file_paths() {
         let sut = LineCounter()
-        let actual = sut.enumerateFilePaths(url: srcURL)
-            .map { url -> String in
-                let components = url.pathComponents
-                return components[components.count - 2..<components.count]
-                    .joined(separator: "/")
-            }
+        let actual = sut.enumerateFilePaths(url: sourcesURL)
+            .map { $0.pathComponents.suffix(2).joined(separator: "/") }
             .sorted()
         let expect = [
             "LineCounterFramework/LCError.swift",
@@ -30,52 +24,62 @@ final class LineCounterFrameworkTests: XCTestCase {
             "lc/LC.swift",
             "lc/main.swift",
         ]
-        XCTAssertEqual(actual, expect)
-    }
-    
-    func testCountLine() throws {
-        let sut = LineCounter()
-        let mainFileURL = srcURL.appendingPathComponent("lc/main.swift")
-        let actual1 = try sut.countLine(mainFileURL, [])
-        XCTAssertEqual(actual1, 9)
-        let actual2 = try sut.countLine(mainFileURL, ["swift"])
-        XCTAssertEqual(actual2, 9)
-    }
-    
-    func testCountLineThrowLCErrorSkipped() {
-        let sut = LineCounter()
-        let mainFileURL = srcURL.appendingPathComponent("lc/main.swift")
-        XCTAssertThrowsError(try sut.countLine(mainFileURL, ["txt"])) { error in
-            XCTAssertEqual(error as? LCError, LCError.skipped(file: ""))
-        }
-    }
-    
-    func testCountLineThrowLCErrorCouldNotRead() {
-        let sut = LineCounter()
-        let dummyFileURL = srcURL.appendingPathComponent("lc/dummy.swift")
-        XCTAssertThrowsError(try sut.countLine(dummyFileURL, [])) { error in
-            XCTAssertEqual(error as? LCError, LCError.couldNotRead(file: ""))
-        }
-    }
-    
-    func testOutputSinglePath() {
-        let sut = LineCounter()
-        let filePaths = [srcURL.appendingPathComponent("lc/LC.swift")]
-        let actual = sut.output(filePaths, ["swift"], true)
-        Swift.print(actual)
-        let lines = actual.components(separatedBy: CharacterSet.newlines).count
-        XCTAssertEqual(lines, 1)
+        #expect(actual == expect)
     }
 
-    func testOutputMultiPaths() {
+    @Test
+    func count_line_without_file_extension() throws {
         let sut = LineCounter()
+        let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
+        let actual = try sut.countLine(mainFileURL, [])
+        #expect(actual == 9)
+    }
+
+    @Test
+    func count_line_with_file_extension() throws {
+        let sut = LineCounter()
+        let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
+        let actual = try sut.countLine(mainFileURL, ["swift"])
+        #expect(actual == 9)
+    }
+
+    @Test
+    func count_line_throw_LCErrorSkipped() {
+        let sut = LineCounter()
+        let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
+        #expect(throws: LCError.skipped(file: "")) {
+            try sut.countLine(mainFileURL, ["txt"])
+        }
+    }
+
+    @Test
+    func count_line_throw_LCErrorCouldNotRead() {
+        let sut = LineCounter()
+        let dummyFileURL = sourcesURL.appendingPathComponent("lc/dummy.swift")
+        #expect(throws: LCError.couldNotRead(file: "")) {
+            try sut.countLine(dummyFileURL, [])
+        }
+    }
+
+    @Test
+    func output_single_path() {
+        let sut = LineCounter()
+        let filePaths = [sourcesURL.appendingPathComponent("lc/LC.swift")]
+        let actual = sut.output(filePaths, ["swift"], true)
+        let lines = actual.components(separatedBy: CharacterSet.newlines).count
+        #expect(lines == 1)
+    }
+
+    @Test
+    func output_multi_paths() {
+        let sut = LineCounter()
+        let sourcesURL = sourcesURL
         let filePaths = [
-            srcURL.appendingPathComponent("lc/LC.swift"),
-            srcURL.appendingPathComponent("lc/main.swift"),
+            sourcesURL.appendingPathComponent("lc/LC.swift"),
+            sourcesURL.appendingPathComponent("lc/main.swift"),
         ]
         let actual = sut.output(filePaths, ["swift"], true)
-        Swift.print(actual)
         let lines = actual.components(separatedBy: CharacterSet.newlines).count
-        XCTAssertEqual(lines, 4)
+        #expect(lines == 4)
     }
 }
