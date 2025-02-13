@@ -60,8 +60,8 @@ $ lc -p [対象のパス] -e [拡張子]
    ```sh:スクリプトの例
    # プロジェクトのルートディレクトリ以下のSwiftファイルの行数をカウントする
    xcrun --sdk macosx swift run \
-   --package-path ${BUILD_DIR%Build/*}SourcePackages/checkouts/LineCounter \
-   lc -p ./${SRCROOT} -e swift --no-warnings
+     --package-path ${BUILD_DIR%Build/*}SourcePackages/checkouts/LineCounter \
+     lc -p ./${SRCROOT} -e swift --no-warnings
    ```
 
 これで Build するたびに行数のカウントが実行されます。
