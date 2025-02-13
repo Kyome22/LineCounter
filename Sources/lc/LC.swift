@@ -1,9 +1,8 @@
-//
-//  LC.swift
-//
-//
-//  Created by ky0me22 on 2022/03/11.
-//
+/*
+ LC.swift
+
+ Created by ky0me22 on 2022/03/11.
+*/
 
 import ArgumentParser
 import LineCounterFramework
@@ -12,7 +11,7 @@ struct LC: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "lc",
         abstract: "A tool to count the number of lines in the specified file.",
-        version: LCVersion.current.value
+        version: "1.3.0"
     )
     
     @Option(
@@ -35,10 +34,6 @@ struct LC: ParsableCommand {
     var noWarnings: Bool = false
     
     mutating func run() throws {
-        LineCounter.run(
-            paths: self.paths,
-            extentions: self.extensions,
-            noWarnings: self.noWarnings
-        )
+        LineCounter(paths: paths, extensions: extensions, noWarnings: noWarnings).run()
     }
 }

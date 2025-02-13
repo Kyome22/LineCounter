@@ -1,80 +1,84 @@
-//
-//  LineCounter.swift
-//
-//
-//  Created by ky0me22 on 2021/04/21.
-//
+/*
+ LineCounter.swift
+
+ Created by ky0me22 on 2021/04/21.
+*/
 
 import Foundation
 
 public struct LineCounter {
-    public static func run(paths: [String], extentions: [String], noWarnings: Bool) {
-        let lc = LineCounter()
-        let filePaths = paths.flatMap { path -> [URL] in
-            lc.enumerateFilePaths(url: URL(fileURLWithPath: path))
-        }
-        if filePaths.isEmpty {
-            Swift.print("⚠️ There was no file to read.")
-        } else {
-            Swift.print(lc.output(filePaths, extentions, noWarnings))
-        }
+    var paths: [String]
+    var extensions: [String]
+    var noWarnings: Bool
+
+    public init(paths: [String], extensions: [String], noWarnings: Bool) {
+        self.paths = paths
+        self.extensions = extensions
+        self.noWarnings = noWarnings
     }
-    
-    func enumerateFilePaths(url: URL) -> [URL] {
+
+    func enumerateFileURLs(url: URL) -> [URL] {
         let fm = FileManager.default
         var isDirectory: ObjCBool = false
-        guard fm.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
+        guard fm.fileExists(atPath: url.absoluteURL.path(), isDirectory: &isDirectory) else {
             return []
         }
         guard isDirectory.boolValue else {
             return [url]
         }
-        guard let contents = try? fm.contentsOfDirectory(atPath: url.path) else {
+        guard let contents = try? fm.contentsOfDirectory(atPath: url.absoluteURL.path()) else {
             return []
         }
         return contents.flatMap { content in
-            enumerateFilePaths(url: url.appendingPathComponent(content))
+            enumerateFileURLs(url: url.appendingPathComponent(content))
         }
     }
-    
-    func countLine(_ filePath: URL, _ extensions: [String]) throws -> Int {
-        guard extensions.isEmpty || extensions.contains(filePath.pathExtension) else {
-            throw LCError.skipped(file: filePath.relativePath)
+
+    func count(fileURL: URL) -> Result<Int, CountError> {
+        guard extensions.isEmpty || extensions.contains(fileURL.pathExtension) else {
+            return .failure(.skipped(fileURL.path()))
         }
-        guard let file = try? String(contentsOf: filePath, encoding: .utf8) else {
-            throw LCError.couldNotRead(file: filePath.relativePath)
+        guard let file = try? String(contentsOf: fileURL, encoding: .utf8) else {
+            return .failure(.failedToRead(fileURL.path()))
         }
-        return file.components(separatedBy: CharacterSet.newlines).count
+        let count = file.components(separatedBy: CharacterSet.newlines).count
+        return .success(count)
     }
-    
-    func output(_ filePaths: [URL], _ extensions: [String], _ noWarnings: Bool) -> String {
-        var result: String = ""
-        var fileCount: Int = 0
-        var totalCount: Int = 0
-        filePaths.forEach { filePath in
-            do {
-                let count: Int = try countLine(filePath, extensions)
-                result += "\t\(count)\t\(filePath.relativePath)\n"
-                fileCount += 1
-                totalCount += count
-            } catch let lcError as LCError {
-                if noWarnings {
-                    return
+
+    func output(fileURLs: [URL]) -> String {
+        guard !fileURLs.isEmpty else {
+            return "⚠️ No files found."
+        }
+        let output = fileURLs.reduce(into: Output()) { partialResult, fileURL in
+            switch count(fileURL: fileURL) {
+            case let .success(count):
+                partialResult.rows.append("\t\(count)\t\(fileURL.path())")
+                partialResult.totalCount += count
+                partialResult.filesCount += 1
+            case let .failure(error):
+                guard !noWarnings else { return }
+                switch error {
+                case let .skipped(filePath):
+                    partialResult.rows.append("\tSkipped\t\(filePath)")
+                case let .failedToRead(filePath):
+                    partialResult.rows.append("\tCouldn’t read\t\(filePath)")
                 }
-                switch lcError {
-                case let .couldNotRead(file):
-                    result += "\tCouldn’t read\t\(file)\n"
-                case let .skipped(file):
-                    result += "\tSkipped\t\(file)\n"
-                }
-            } catch {
-                fatalError("Oops, impossible error.")
             }
         }
-        result = result.trimmingCharacters(in: .newlines)
-        if 1 < fileCount {
-            result = "🎯 Result of LineCounter\n\(result)\nTotal: \(totalCount) (\(fileCount) files)"
+        guard 1 < output.filesCount else {
+            return output.rows.joined(separator: "\n")
         }
-        return result
+        return """
+            🎯 Result of LineCounter
+            \(output.rows.joined(separator: "\n"))
+            Total: \(output.totalCount) (\(output.filesCount) files)
+            """
+    }
+
+    public func run() {
+        let fileURLs = paths.flatMap { path in
+            enumerateFileURLs(url: URL(fileURLWithPath: path))
+        }
+        Swift.print(output(fileURLs: fileURLs))
     }
 }

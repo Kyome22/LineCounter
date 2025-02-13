@@ -9,7 +9,7 @@ let swiftSettings: [SwiftSetting] = [
 let package = Package(
     name: "LineCounter",
     platforms: [
-        .macOS(.v12),
+        .macOS(.v13),
     ],
     products: [
         .executable(

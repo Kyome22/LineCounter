@@ -12,15 +12,16 @@ struct LineCounterFrameworkTests {
     }
 
     @Test
-    func enumerate_file_paths() {
-        let sut = LineCounter()
-        let actual = sut.enumerateFilePaths(url: sourcesURL)
+    func enumerate_file_urls() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
+        print("🦩", sourcesURL)
+        let actual = sut.enumerateFileURLs(url: sourcesURL)
             .map { $0.pathComponents.suffix(2).joined(separator: "/") }
             .sorted()
         let expect = [
-            "LineCounterFramework/LCError.swift",
-            "LineCounterFramework/LCVersion.swift",
+            "LineCounterFramework/CountError.swift",
             "LineCounterFramework/LineCounter.swift",
+            "LineCounterFramework/Output.swift",
             "lc/LC.swift",
             "lc/main.swift",
         ]
@@ -28,58 +29,74 @@ struct LineCounterFrameworkTests {
     }
 
     @Test
-    func count_line_without_file_extension() throws {
-        let sut = LineCounter()
+    func count_without_file_extension() throws {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
         let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
-        let actual = try sut.countLine(mainFileURL, [])
-        #expect(actual == 9)
+        let actual = try sut.count(fileURL: mainFileURL).get()
+        #expect(actual == 8)
     }
 
     @Test
-    func count_line_with_file_extension() throws {
-        let sut = LineCounter()
+    func count_with_matched_file_extension() throws {
+        let sut = LineCounter(paths: [], extensions: ["swift"], noWarnings: false)
         let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
-        let actual = try sut.countLine(mainFileURL, ["swift"])
-        #expect(actual == 9)
+        let actual = try sut.count(fileURL: mainFileURL).get()
+        #expect(actual == 8)
     }
 
     @Test
-    func count_line_throw_LCErrorSkipped() {
-        let sut = LineCounter()
+    func count_with_not_matched_file_extension() {
+        let sut = LineCounter(paths: [], extensions: ["txt"], noWarnings: false)
         let mainFileURL = sourcesURL.appendingPathComponent("lc/main.swift")
-        #expect(throws: LCError.skipped(file: "")) {
-            try sut.countLine(mainFileURL, ["txt"])
+        #expect(throws: CountError.skipped("Contents/Resources/Sources/lc/main.swift")) {
+            try sut.count(fileURL: mainFileURL).get()
         }
     }
 
     @Test
-    func count_line_throw_LCErrorCouldNotRead() {
-        let sut = LineCounter()
+    func count_with_invalid_file() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
         let dummyFileURL = sourcesURL.appendingPathComponent("lc/dummy.swift")
-        #expect(throws: LCError.couldNotRead(file: "")) {
-            try sut.countLine(dummyFileURL, [])
+        #expect(throws: CountError.failedToRead("Contents/Resources/Sources/lc/dummy.swift")) {
+            try sut.count(fileURL: dummyFileURL).get()
         }
     }
 
     @Test
-    func output_single_path() {
-        let sut = LineCounter()
-        let filePaths = [sourcesURL.appendingPathComponent("lc/LC.swift")]
-        let actual = sut.output(filePaths, ["swift"], true)
-        let lines = actual.components(separatedBy: CharacterSet.newlines).count
-        #expect(lines == 1)
+    func output_single_file() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
+        let fileURLs = [sourcesURL.appendingPathComponent("lc/LC.swift")]
+        let actual = sut.output(fileURLs: fileURLs)
+        #expect(actual == "\t40\tContents/Resources/Sources/lc/LC.swift")
     }
 
     @Test
-    func output_multi_paths() {
-        let sut = LineCounter()
+    func output_multi_files() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
         let sourcesURL = sourcesURL
-        let filePaths = [
+        let fileURLs = [
             sourcesURL.appendingPathComponent("lc/LC.swift"),
             sourcesURL.appendingPathComponent("lc/main.swift"),
         ]
-        let actual = sut.output(filePaths, ["swift"], true)
-        let lines = actual.components(separatedBy: CharacterSet.newlines).count
-        #expect(lines == 4)
+        let actual = sut.output(fileURLs: fileURLs)
+        #expect(actual == """
+            🎯 Result of LineCounter
+            \t40\tContents/Resources/Sources/lc/LC.swift
+            \t8\tContents/Resources/Sources/lc/main.swift
+            Total: 48 (2 files)
+            """)
+    }
+}
+
+extension CountError: Equatable {
+    public static func == (lhs: CountError, rhs: CountError) -> Bool {
+        switch (lhs, rhs) {
+        case let (.skipped(l), .skipped(r)) where l == r:
+            true
+        case let (.failedToRead(l), .failedToRead(r)) where l == r:
+            true
+        default:
+            false
+        }
     }
 }
