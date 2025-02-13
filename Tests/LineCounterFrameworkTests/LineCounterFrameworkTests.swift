@@ -14,7 +14,6 @@ struct LineCounterFrameworkTests {
     @Test
     func enumerate_file_urls() {
         let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
-        print("🦩", sourcesURL)
         let actual = sut.enumerateFileURLs(url: sourcesURL)
             .map { $0.pathComponents.suffix(2).joined(separator: "/") }
             .sorted()
@@ -63,6 +62,13 @@ struct LineCounterFrameworkTests {
     }
 
     @Test
+    func output_no_files() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
+        let actual = sut.output(fileURLs: [])
+        #expect(actual == "⚠️ No files found.")
+    }
+
+    @Test
     func output_single_file() {
         let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
         let fileURLs = [sourcesURL.appendingPathComponent("lc/LC.swift")]
@@ -77,6 +83,58 @@ struct LineCounterFrameworkTests {
         let fileURLs = [
             sourcesURL.appendingPathComponent("lc/LC.swift"),
             sourcesURL.appendingPathComponent("lc/main.swift"),
+        ]
+        let actual = sut.output(fileURLs: fileURLs)
+        #expect(actual == """
+            🎯 Result of LineCounter
+            \t40\tContents/Resources/Sources/lc/LC.swift
+            \t8\tContents/Resources/Sources/lc/main.swift
+            Total: 48 (2 files)
+            """)
+    }
+
+    @Test
+    func output_multi_files_with_warning_skipped() {
+        let sut = LineCounter(paths: [], extensions: ["swift"], noWarnings: false)
+        let sourcesURL = sourcesURL
+        let fileURLs = [
+            sourcesURL.appendingPathComponent("lc/main.swift"),
+            sourcesURL.appendingPathComponent("lc/dummy.txt"),
+        ]
+        let actual = sut.output(fileURLs: fileURLs)
+        #expect(actual == """
+            🎯 Result of LineCounter
+            \t8\tContents/Resources/Sources/lc/main.swift
+            \tSkipped\tContents/Resources/Sources/lc/dummy.txt
+            Total: 8 (1 file)
+            """)
+    }
+
+    @Test
+    func output_multi_files_with_warning_failed_to_read() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: false)
+        let sourcesURL = sourcesURL
+        let fileURLs = [
+            sourcesURL.appendingPathComponent("lc/main.swift"),
+            sourcesURL.appendingPathComponent("lc/dummy.txt"),
+        ]
+        let actual = sut.output(fileURLs: fileURLs)
+        #expect(actual == """
+            🎯 Result of LineCounter
+            \t8\tContents/Resources/Sources/lc/main.swift
+            \tCould not read\tContents/Resources/Sources/lc/dummy.txt
+            Total: 8 (1 file)
+            """)
+    }
+
+    @Test
+    func output_multi_files_without_warning() {
+        let sut = LineCounter(paths: [], extensions: [], noWarnings: true)
+        let sourcesURL = sourcesURL
+        let fileURLs = [
+            sourcesURL.appendingPathComponent("lc/LC.swift"),
+            sourcesURL.appendingPathComponent("lc/main.swift"),
+            sourcesURL.appendingPathComponent("lc/dummy.txt"),
         ]
         let actual = sut.output(fileURLs: fileURLs)
         #expect(actual == """

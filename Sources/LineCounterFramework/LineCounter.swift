@@ -61,17 +61,18 @@ public struct LineCounter {
                 case let .skipped(filePath):
                     partialResult.rows.append("\tSkipped\t\(filePath)")
                 case let .failedToRead(filePath):
-                    partialResult.rows.append("\tCouldn’t read\t\(filePath)")
+                    partialResult.rows.append("\tCould not read\t\(filePath)")
                 }
             }
         }
-        guard 1 < output.filesCount else {
+        guard 1 < output.rows.count else {
             return output.rows.joined(separator: "\n")
         }
+        let unit = output.filesCount > 1 ? "files" : "file"
         return """
             🎯 Result of LineCounter
             \(output.rows.joined(separator: "\n"))
-            Total: \(output.totalCount) (\(output.filesCount) files)
+            Total: \(output.totalCount) (\(output.filesCount) \(unit))
             """
     }
 
