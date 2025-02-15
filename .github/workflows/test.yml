@@ -15,11 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show Xcode Version
-        run: xcodebuild -version
-
-      - name: Show Build Settings
-        run: xcodebuild -showBuildSettings -scheme LineCounter -destination "platform=macOS,arch=arm64"
+      - name: Show Tools Version
+        run: |
+          xcodebuild -version
+          xcbeautify --version
 
       - name: Run Test
         run: |
