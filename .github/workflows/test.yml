@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-test:
+    name: Run Test
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode_16.2.app/Contents/Developer"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode Version
+        run: xcodebuild -version
+
+      - name: Show Build Settings
+        run: xcodebuild -showBuildSettings -scheme LineCounter -destination "platform=macOS,arch=arm64"
+
+      - name: Run Test
+        run: |
+          xcodebuild test \
+            -scheme LineCounter \
+            -destination "platform=macOS,arch=arm64" \
+            -derivedDataPath DerivedData \
+            -resultBundlePath TestResults/result_bundle | \
+            xcbeautify && exit ${PIPESTATUS[0]}
