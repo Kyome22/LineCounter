@@ -15,10 +15,6 @@ let package = Package(
         .executable(
             name: "lc",
             targets: ["lc"]
-        ),
-        .library(
-            name: "LineCounterFramework",
-            targets: ["LineCounterFramework"]
         )
     ],
     dependencies: [
